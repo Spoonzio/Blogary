@@ -6,26 +6,140 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Blogary.Models;
+using Blogary.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Blogary.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly IBlogRepository _blogRepository;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger,
+                                IBlogRepository blogRepository)
         {
             _logger = logger;
+            _blogRepository = blogRepository;
         }
 
         public IActionResult Index()
         {
-            return View();
+            IEnumerable<Blog> allBlogs = _blogRepository.GetAllBlogs().Where(b => b.Approved == true);
+
+            if (allBlogs == null)
+            {
+                return View(new IndexViewModel
+                {
+                    BlogInTopic = null,
+                    LatestBlog = null
+                });
+            }
+
+            List<Blog> blogs = new List<Blog>();
+
+            Dictionary<Topic, Blog> blogInTopic = new Dictionary<Topic, Blog>();
+
+            // Get one latest blog from each topic
+            foreach (Blog blog in allBlogs)
+            {
+                if (!blogInTopic.ContainsKey(blog.Topic))
+                {
+                    blogInTopic.Add(blog.Topic, blog);
+                }
+                else
+                {
+                    Blog existedBlog = blogInTopic[blog.Topic];
+                    int timeDiff = DateTime.Compare(blog.Date, existedBlog.Date);
+
+                    // Find a later blog with the same topic
+                    if (timeDiff < 0)
+                    {
+                        blogInTopic.Remove(blog.Topic);
+                        blogInTopic.Add(blog.Topic, blog);
+                    }
+                }
+            }
+
+            // Latest blog will be headline
+            Blog latestBlog = new Blog { };
+
+            if (blogInTopic.Count > 0)
+            {
+                latestBlog = blogInTopic.ElementAt(0).Value;
+
+                foreach (KeyValuePair<Topic, Blog> entry in blogInTopic)
+                {
+                    int timeDiff = DateTime.Compare(latestBlog.Date, entry.Value.Date);
+
+                    // Find a later blog with the same topic
+                    if (timeDiff < 0)
+                    {
+                        latestBlog = entry.Value;
+                    }
+                }
+            }
+
+            // View model with blog contents
+            IndexViewModel model = new IndexViewModel
+            {
+                BlogInTopic = blogInTopic,
+                LatestBlog = latestBlog
+            };
+
+            return View(model);
+
         }
 
-        public IActionResult Privacy()
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> ViewBlog(int BlogId)
         {
-            return View();
+            // Get blog from DB
+            var blog = _blogRepository.GetBlog(BlogId);
+
+            if (blog == null)
+            {
+                ViewBag.ErrorTitle = "Blog cannot be found!";
+                ViewBag.ErrorMessage = "No blog with such ID was found.";
+                return View("Error");
+            }
+            else
+            {
+                //var author = await userManager.FindByIdAsync(blog.UserId);
+                ApplicationUser author = new ApplicationUser() {UserName = "DemoUser", Id = blog.UserId };
+
+                // Unapprove blogs
+                if (blog.Approved == false)
+                {
+                    if (User.IsInRole("Admin") || author.UserName.Equals(User.Identity.Name))
+                    {
+                        // Author or admin view unapproved blog
+                        ViewBag.Alert = "Blog is not approved, therefore not published to public";
+                        ViewBag.AlertClass = "alert-warning";
+                    }
+                    else
+                    {
+                        // Not admin and not author
+                        ViewBag.ErrorTitle = "Unapproved blog!";
+                        ViewBag.ErrorMessage = "The blog still awaits approval from moderators or admins.";
+                        return View("Error");
+                    }
+                }
+
+                // Populate ViewModel with blog data
+                ViewBlogViewModel model = new ViewBlogViewModel
+                {
+                    Title = blog.Title,
+                    BriefDescription = blog.BriefDescription,
+                    Topic = blog.Topic,
+                    Date = blog.Date,
+                    BlogContent = blog.BlogContent.Split("\n"),
+                    Username = author.UserName
+                };
+
+                return View(model);
+            }
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

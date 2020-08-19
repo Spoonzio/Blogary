@@ -1,8 +1,84 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IndexViewModel
+@{
+    ViewBag.Title = "Welcome to Blogary";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@{
+    if (Model.BlogInTopic.Count == 0)
+    {
+        <div class="jumbotron p-3 p-md-5 text-white rounded bg-dark">
+            <div class="col-md-6 px-0">
+                <h1 class="font-italic">No blog found</h1>
+
+                @* if no blog exist, jumbotron action link*@
+
+                @*@if (signInManager.IsSignedIn(User))
+                {
+                    <p class="lead my-3">Perhaps you can write one!</p>
+                    <p class="lead mb-0">
+                        <a asp-action="CreateBlog"
+                           asp-controller="Home"
+                           asp-route-Username="@User.Identity.Name" class="text-white font-weight-bold">Write a blog</a>
+                    </p>
+                }
+                else
+                {
+                    <p class="lead my-3">Write a blog as a user!</p>
+                    <p class="lead mb-0">
+                        <a asp-action="Register" asp-controller="Account"
+                           class="text-white font-weight-bold">Register</a>
+
+                        <a asp-action="Login" asp-controller="Account"
+                           class="text-white font-weight-bold">Log in</a>
+                    </p>
+                }*@
+
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="jumbotron p-3 p-md-5 text-white rounded bg-dark">
+            <div class="col-md-6 px-0">
+                <h1 class="font-italic">@Model.LatestBlog.Title</h1>
+                <p class="lead my-3">@Model.LatestBlog.BriefDescription</p>
+                <p class="lead mb-0">
+                    <a asp-action="ViewBlog"
+                       asp-controller="Home"
+                       asp-route-BlogId="@Model.LatestBlog.Id" class="text-white font-weight-bold">Continue reading...</a>
+                </p>
+            </div>
+        </div>
+    }
+}
+
+
+@* Cards for topics latest blog *@
+<div class="row mb-2">
+    @{
+        if (Model.BlogInTopic != null)
+        {
+            foreach (KeyValuePair<Topic, Blog> entry in Model.BlogInTopic)
+            {
+                <div class="col-md-6">
+                    <div class="card flex-md-row mb-4 box-shadow h-md-250">
+                        <div class="card-body d-flex flex-column align-items-start">
+                            <strong class="d-inline-block mb-2 text-primary">@entry.Key</strong>
+                            <h3 class="mb-0">
+                                @entry.Value.Title
+                            </h3>
+                            <div class="mb-1 text-muted">@entry.Value.Date.ToShortDateString()</div>
+                            <p class="card-text mb-auto">@entry.Value.BriefDescription</p>
+                            <a asp-action="ViewBlog"
+                               asp-controller="Home"
+                               asp-route-BlogId="@entry.Value.Id"
+                               class="btn btn-outline-primary">Continue reading</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    }
+
 </div>
+

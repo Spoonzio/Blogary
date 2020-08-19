@@ -1,0 +1,29 @@
+﻿@model ViewBlogViewModel
+
+@{
+    ViewBag.Title = Model.Title;
+}
+
+
+<div class="blog-post">
+    <h1 class="blog-post-title">@Model.Title</h1>
+    <p class="blog-post-meta">
+        @Model.Date,
+        by <a asp-action="Author"
+              asp-controller="Profile"
+              asp-route-username="@Model.Username">@Model.Username</a>
+        </p>
+
+        <br />
+
+        <h3 class="blog-post-title pb-3 mb-4 font-italic border-bottom">@Model.BriefDescription</h3>
+
+        <!-- Content -->
+        <div class="blog-content">
+            @foreach (string para in Model.BlogContent)
+            {
+                <p>@para</p>
+            }
+
+        </div>
+    </div>

@@ -16,12 +16,22 @@ namespace Blogary.Models
                 new Blog() {
                     Id = 1,
                     Approved = true,
-                    Title = "",
-                    BriefDescription = "Brief Description of Blog",
-                    BlogContent = "Blog Contents",
+                    Title = "Harcoded Blog Example 1",
+                    BriefDescription = "Brief Description of Blog 1",
+                    BlogContent = "Blog 1 Contents",
                     Date = DateTime.Today,
                     Topic = Topic.Technology,
                     UserId = "0"
+                },
+                new Blog() {
+                    Id = 2,
+                    Approved = true,
+                    Title = "Harcoded Blog Example 2",
+                    BriefDescription = "Brief Description of Blog 2",
+                    BlogContent = "Blog 2 Contents",
+                    Date = DateTime.Today,
+                    Topic = Topic.Fashion,
+                    UserId = "1"
                 }
             };
         }
