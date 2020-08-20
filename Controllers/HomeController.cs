@@ -107,7 +107,7 @@ namespace Blogary.Controllers
             else
             {
                 //var author = await userManager.FindByIdAsync(blog.UserId);
-                ApplicationUser author = new ApplicationUser() {UserName = "DemoUser", Id = blog.UserId };
+                ApplicationUser author = new ApplicationUser() { UserName = "DemoUser", Id = blog.UserId };
 
                 // Unapprove blogs
                 if (blog.Approved == false)
@@ -168,6 +168,25 @@ namespace Blogary.Controllers
             // Sort by date
             List<Blog> blogsInTopicSorted = blogsInTopic.OrderBy(o => o.Date).ToList();
             return View(blogsInTopicSorted);
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult SortByDate()
+        {
+            // Get all blog from DB
+            var blogs = _blogRepository.GetAllBlogs().Where(b => b.Approved == true);
+
+            List<Blog> sortedBlogs = blogs.OrderByDescending(x => x.Date).ToList();
+
+            // Get 25 latest blogs
+            if (sortedBlogs.Count > 25)
+            {
+                sortedBlogs = sortedBlogs.GetRange(0, 25);
+            }
+
+            ViewBag.SortBy = "Date";
+            return View("SortBy", sortedBlogs);
         }
 
 
