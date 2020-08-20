@@ -142,6 +142,35 @@ namespace Blogary.Controllers
             }
         }
 
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult ViewTopic(int TopicId)
+        {
+            Topic selectedTopic;
+
+            try
+            {
+                selectedTopic = (Topic)TopicId;
+            }
+            catch (Exception)
+            {
+                ViewBag.ErrorTitle = "Invalid topic";
+                ViewBag.ErrorMessage = "No topic with such ID was found.";
+                return View("Error");
+            }
+
+            ViewBag.TopicTitle = selectedTopic;
+
+            // Find matching topic
+            var allBlogs = _blogRepository.GetAllBlogs().Where(x => x.Approved == true); ;
+            List<Blog> blogsInTopic = allBlogs.Where(blog => blog.Topic == selectedTopic).ToList();
+
+            // Sort by date
+            List<Blog> blogsInTopicSorted = blogsInTopic.OrderBy(o => o.Date).ToList();
+            return View(blogsInTopicSorted);
+        }
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
