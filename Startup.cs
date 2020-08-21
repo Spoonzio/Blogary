@@ -27,9 +27,7 @@ namespace Blogary
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-
-            services.AddScoped<IBlogRepository, SQLBlogRepository>();
-            
+         
             services.AddDbContextPool<AppDbContext>(options =>
                 options.UseSqlServer("Data Source=tcp:blogarydbserver.database.windows.net,1433;Initial Catalog=Blogary_db;User Id=BlogaryAdmin@blogarydbserver;Password=Spoonzio!")                                    // CONNECTION STRING GOES HERE
             );
@@ -39,12 +37,19 @@ namespace Blogary
             {
                 options.Password.RequiredLength = 10;
                 options.Password.RequiredUniqueChars = 3;
-
                 options.SignIn.RequireConfirmedEmail = true;
 
             })
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
+
+            // MVC
+            services.AddMvc(option => {
+                option.EnableEndpointRouting = false;
+                //Policies
+            });
+
+            services.AddScoped<IBlogRepository, SQLBlogRepository>();
         }
 
 
@@ -57,13 +62,9 @@ namespace Blogary
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                app.UseExceptionHandler("/Error");
+                app.UseStatusCodePagesWithReExecute("/Error/{0}");
             }
-            app.UseHttpsRedirection();
-
-            app.UseRouting();
 
             // Serve static files
             app.UseStaticFiles();
@@ -71,11 +72,10 @@ namespace Blogary
             // Authentication
             app.UseAuthentication();
 
-            app.UseEndpoints(endpoints =>
+            // Route
+            app.UseMvc(routes =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                routes.MapRoute("default", "{controller=Home}/{action=Index}");
             });
         }
     }

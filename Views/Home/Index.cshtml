@@ -1,4 +1,5 @@
-﻿@model IndexViewModel
+﻿@inject SignInManager<ApplicationUser> signInManager
+@model IndexViewModel
 @{
     ViewBag.Title = "Welcome to Blogary";
 }
@@ -10,9 +11,9 @@
             <div class="col-md-6 px-0">
                 <h1 class="font-italic">No blog found</h1>
 
-                @* if no blog exist, jumbotron action link*@
+                @*if no blog exist, jumbotron action link*@
 
-                @*@if (signInManager.IsSignedIn(User))
+                @if (signInManager.IsSignedIn(User))
                 {
                     <p class="lead my-3">Perhaps you can write one!</p>
                     <p class="lead mb-0">
@@ -31,7 +32,7 @@
                         <a asp-action="Login" asp-controller="Account"
                            class="text-white font-weight-bold">Log in</a>
                     </p>
-                }*@
+                }
 
             </div>
         </div>

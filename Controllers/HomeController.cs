@@ -16,6 +16,7 @@ namespace Blogary.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IBlogRepository _blogRepository;
+        private readonly UserManager<ApplicationUser> userManager;
 
         public HomeController(ILogger<HomeController> logger,
                                 IBlogRepository blogRepository,
@@ -23,11 +24,14 @@ namespace Blogary.Controllers
         {
             _logger = logger;
             _blogRepository = blogRepository;
+            this.userManager = userManager;
         }
 
+        [AllowAnonymous]
+        [HttpGet]
         public IActionResult Index()
         {
-            IEnumerable<Blog> allBlogs = _blogRepository.GetAllBlogs().Where(b => b.Approved == true);
+            IEnumerable<Blog> allBlogs = _blogRepository.GetAllBlogs().Where(b => b.Approved == true || b.Approved == false); // Remove after approval is implemented
 
             if (allBlogs == null)
             {
@@ -108,8 +112,7 @@ namespace Blogary.Controllers
             }
             else
             {
-                //var author = await userManager.FindByIdAsync(blog.UserId);
-                ApplicationUser author = new ApplicationUser() { UserName = "DemoUser", Id = blog.UserId };
+                var author = await userManager.FindByIdAsync(blog.UserId);
 
                 // Unapprove blogs
                 if (blog.Approved == false)
@@ -191,6 +194,57 @@ namespace Blogary.Controllers
             return View("SortBy", sortedBlogs);
         }
 
+        // Get Create Blog Page
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> CreateBlog(string Username)
+        {
+            var user = await userManager.FindByNameAsync(Username);
+            if (user != null)
+            {
+                ViewBag.UserId = user.Id;
+                return View();
+            }
+            else
+            {
+                ViewBag.ErrorTitle = "Something went wrong!";
+                ViewBag.ErrorMessage = "Contact Admin";
+                return View("Error");
+            }
+        }
+
+        // Post Created Blog
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreateBlog(CreateBlogViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                Blog blog = new Blog
+                {
+                    UserId = model.UserId,
+                    Title = model.Title,
+                    BriefDescription = model.BriefDescription,
+                    Topic = model.Topic,
+                    BlogContent = model.BlogContent,
+                    Date = DateTime.Now,
+                    Approved = false
+                };
+
+                // Add to Database
+                _blogRepository.Add(blog);
+
+                //Show all blog from user
+                var user = await userManager.FindByIdAsync(model.UserId);
+
+                // Message
+                TempData["Alert"] = $"Blog with title \"{blog.Title}\" awaits approval from admin";
+                TempData["AlertClass"] = "alert-warning";
+                return RedirectToAction("Author", "Profile", new { userName = user.UserName });
+            }
+
+            return View(model);
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

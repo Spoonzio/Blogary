@@ -1,0 +1,61 @@
+﻿@model CreateBlogViewModel
+
+@{
+    ViewBag.Title = "Create a Blog";
+    var UserId = ViewBag.UserId;
+}
+
+<h1 class="display-4">Create A New Blog</h1>
+
+<form method="post">
+    <div class="form-group">
+        <label for="Title"></label>
+        <input class="form-control" placeholder="Title of the blog" asp-for="Title">
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="BriefDescription"></label>
+        <input class="form-control" placeholder="Brief description of the blog" asp-for="BriefDescription">
+        <span asp-validation-for="BriefDescription" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label for="Topic"></label>
+        <select class="form-control" asp-for="Topic" asp-items="Html.GetEnumSelectList<Topic>()">
+            <option value="" disabled selected>Please select a topic</option>
+        </select>
+        <span asp-validation-for="Topic" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label for="Content"></label>
+        <textarea class="form-control" rows="3" asp-for="BlogContent"></textarea>
+        <span asp-validation-for="BlogContent" class="text-danger"></span>
+    </div>
+
+
+    <input class="form-control" asp-for="UserId" value="@UserId" type="hidden">
+
+
+
+    <input class="form-control" placeholder="Brief description of the blog"
+           asp-for="Date" type="hidden"
+           value="@DateTime.Now">
+
+
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="form-group row">
+        <div class="col-sm-10">
+            <button type="submit" class="btn btn-primary">Create</button>
+
+            <a asp-action="Index" asp-controller="Home"
+               class="btn btn-danger">Cancel</a>
+        </div>
+    </div>
+
+</form>
+
+
+<script src="~/JS/script.js"></script>
