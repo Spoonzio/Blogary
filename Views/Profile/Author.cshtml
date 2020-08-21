@@ -1,0 +1,79 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model AuthorProfileViewModel
+
+
+<div class="jumbotron">
+    <div class="container">
+        <h1 class="display-3">@Model.User.UserName</h1>
+
+        @{
+            if (User.Identity.Name == Model.User.UserName)
+            {
+                <a asp-action="EditProfile"
+                   asp-controller="Account"
+                   asp-route-username="@Model.User.UserName"
+                   class="btn btn-primary">Edit profile</a>
+            }
+        }
+
+    </div>
+</div>
+
+<div class="container">
+    @{
+        if (Model.Blogs.Count == 0)
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    <h2>No blog found</h2>
+                    <p>This user has not written any blogs yet</p>
+                </div>
+            </div>
+            <hr>
+        }
+        else
+        {
+            foreach (var blog in Model.Blogs)
+            {
+                <div class="row">
+                    <div class="card">
+                        <div class="card-header">
+                            @blog.Topic
+                        </div>
+
+                        <div class="card-body">
+                            <h2 class="card-title">@blog.Title</h2>
+                            <p class="card-text">@blog.BriefDescription</p>
+                            <p class="card-text">@blog.Date.ToShortDateString()</p>
+                            @{
+                                if (User.Identity.Name == Model.User.UserName || User.IsInRole("Admin"))
+                                {
+                                    <form method="post">
+                                        <button type="submit" class="btn btn-danger" asp-action="DeleteBlog" asp-controller="Home" asp-route-BlogId=@blog.Id>
+                                            Delete blog
+                                        </button>
+                                    </form>
+
+                                    <a class="btn btn-warning" asp-action="EditBlog" asp-controller="Home" asp-route-BlogId=@blog.Id>
+                                        Edit blog
+                                    </a>
+                                }
+                            }
+                            <a class="btn btn-primary float-right" asp-action="ViewBlog" asp-controller="Home" asp-route-BlogId=@blog.Id>
+                                Continue reading...
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+            }
+        }
+
+    }
+
+</div>
