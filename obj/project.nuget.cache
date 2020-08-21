@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "iMbux2G/nKsSQ+NbaJ3FFB/lmUSesloy4xrbncYRw2V+TscejJaLtCwmex5xvttWtAS8I05/bP5ppfJNM3rmlw==",
+  "dgSpecHash": "9uztCYlRMiyE9QF7S0PrIRXvy28Xg2hjZlbvoWMTqHXQ6ExLhG0i0LTXDZii/CkB2tYs4UeRMK7KasaFwsaClw==",
   "success": true,
   "projectFilePath": "H:\\Projects\\C#\\Blogary\\Blogary\\Blogary.csproj",
   "expectedPackageFiles": [
@@ -46,6 +46,8 @@
     "C:\\Users\\Spoonzio\\.nuget\\packages\\runtime.win-arm64.runtime.native.system.data.sqlclient.sni\\4.4.0\\runtime.win-arm64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
     "C:\\Users\\Spoonzio\\.nuget\\packages\\runtime.win-x64.runtime.native.system.data.sqlclient.sni\\4.4.0\\runtime.win-x64.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
     "C:\\Users\\Spoonzio\\.nuget\\packages\\runtime.win-x86.runtime.native.system.data.sqlclient.sni\\4.4.0\\runtime.win-x86.runtime.native.system.data.sqlclient.sni.4.4.0.nupkg.sha512",
+    "C:\\Users\\Spoonzio\\.nuget\\packages\\sendgrid\\9.21.0\\sendgrid.9.21.0.nupkg.sha512",
+    "C:\\Users\\Spoonzio\\.nuget\\packages\\starkbank-ecdsa\\1.2.0\\starkbank-ecdsa.1.2.0.nupkg.sha512",
     "C:\\Users\\Spoonzio\\.nuget\\packages\\system.collections\\4.3.0\\system.collections.4.3.0.nupkg.sha512",
     "C:\\Users\\Spoonzio\\.nuget\\packages\\system.collections.concurrent\\4.3.0\\system.collections.concurrent.4.3.0.nupkg.sha512",
     "C:\\Users\\Spoonzio\\.nuget\\packages\\system.collections.immutable\\1.7.1\\system.collections.immutable.1.7.1.nupkg.sha512",
