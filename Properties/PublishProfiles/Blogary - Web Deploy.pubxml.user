@@ -8,4 +8,9 @@ by editing this MSBuild file. In order to learn more about this please visit htt
     <TimeStampOfAssociatedLegacyPublishXmlFile />
     <EncryptedPassword>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAA9ua/DCyk8kawFM5LglXPKAAAAAACAAAAAAAQZgAAAAEAACAAAAAho30IQhKOWegz4gpV0Wct1fsS1W5CYNa0bCT+7e2mNAAAAAAOgAAAAAIAACAAAACoJm67/s5QLqRO1s088ghXg7aMhBChDLrl/XkNrNIVHoAAAABceKhxaOQXAGVrYoTnNKQwO70Ww6iPvLlNv5h0wQpFfgoWKtQDKGCJ2mYj2euztO+a5LC3i3gYYNNimiHlAxhmUpopzUll+IeUmWnK5abcuOqZRh6YuIDkMs/W6ycMaOeqGTQZIZ+aClsxYazHgHQr5C1DUtnc5ba4jPrWDZRIQUAAAAB6ZHcMPnwniOD67GQwzPAttM2ph+667MEGMyddEso0yNr3smH0mzFioZnFMTLs1v6lfcAbxWelKKOJ4+FO+R50</EncryptedPassword>
   </PropertyGroup>
+  <ItemGroup>
+    <EFMigrations Include="Blogary.Models.AppDbContext">
+      <Value>Data Source=tcp:blogarydbserver.database.windows.net,1433%3bInitial Catalog=Blogary_db%3bUser Id=BlogaryAdmin%40blogarydbserver%3bPassword=Spoonzio!</Value>
+    </EFMigrations>
+  </ItemGroup>
 </Project>

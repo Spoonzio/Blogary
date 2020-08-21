@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Blogary.Models;
 using Blogary.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace Blogary.Controllers
 {
@@ -17,7 +18,8 @@ namespace Blogary.Controllers
         private readonly IBlogRepository _blogRepository;
 
         public HomeController(ILogger<HomeController> logger,
-                                IBlogRepository blogRepository)
+                                IBlogRepository blogRepository,
+                                UserManager<ApplicationUser> userManager)
         {
             _logger = logger;
             _blogRepository = blogRepository;

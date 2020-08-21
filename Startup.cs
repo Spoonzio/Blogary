@@ -6,6 +6,7 @@ using Blogary.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,12 +28,25 @@ namespace Blogary
         {
             services.AddControllersWithViews();
 
-            // Harcoded DB TBChanged
             services.AddScoped<IBlogRepository, SQLBlogRepository>();
-            services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer("")                                    // CONNECTION STRING GOES HERE
+            
+            services.AddDbContextPool<AppDbContext>(options =>
+                options.UseSqlServer("Data Source=tcp:blogarydbserver.database.windows.net,1433;Initial Catalog=Blogary_db;User Id=BlogaryAdmin@blogarydbserver;Password=Spoonzio!")                                    // CONNECTION STRING GOES HERE
             );
+
+            // Identity user and roles
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.Password.RequiredLength = 10;
+                options.Password.RequiredUniqueChars = 3;
+
+                options.SignIn.RequireConfirmedEmail = true;
+
+            })
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
         }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -48,11 +62,14 @@ namespace Blogary
                 app.UseHsts();
             }
             app.UseHttpsRedirection();
-            app.UseStaticFiles();
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            // Serve static files
+            app.UseStaticFiles();
+
+            // Authentication
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {
