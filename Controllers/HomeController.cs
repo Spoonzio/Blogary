@@ -356,6 +356,39 @@ namespace Blogary.Controllers
         }
 
 
+        [AllowAnonymous]
+        [HttpGet]
+        public async Task<IActionResult> AuthorList()
+        {
+            // Get all user id from blog list
+            List<Blog> ApprovedBlogs = _blogRepository.GetAllBlogs().Where(x => x.Approved == true).ToList();
+            List<string> userIds = ApprovedBlogs.Select(x => x.UserId).ToList();
+
+            // Remove duplicates
+            HashSet<string> uniqueIds = new HashSet<string>();
+
+            foreach (string userId in userIds)
+            {
+                uniqueIds.Add(userId);
+            }
+
+            List<ApplicationUser> authors = new List<ApplicationUser>();
+
+            // Get username
+            foreach (string userId in uniqueIds)
+            {
+                var author = await userManager.FindByIdAsync(userId);
+                if (author != null)
+                {
+                    authors.Add(author);
+                }
+            }
+
+            return View(authors);
+        }
+
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
