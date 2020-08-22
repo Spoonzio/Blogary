@@ -132,6 +132,15 @@
             </div>
         </nav>
     </header>
+
+
+    @if (!string.IsNullOrEmpty(ViewBag.Alert))
+    {
+        <div class="alert @ViewBag.AlertClass" role="alert">
+            @ViewBag.Alert
+        </div>
+    }
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()

@@ -246,6 +246,116 @@ namespace Blogary.Controllers
             return View(model);
         }
 
+
+        // Get edit blog page
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> EditBlog(int BlogId)
+        {
+            // Get blog from DB 
+            var blog = _blogRepository.GetBlog(BlogId);
+
+            if (blog == null)
+            {
+                ViewBag.ErrorTitle = "Blog cannot be found!";
+                ViewBag.ErrorMessage = "No blog with such ID was found.";
+                return View("Error");
+            }
+
+            var author = await userManager.FindByIdAsync(blog.UserId);
+
+            // Prevent editing someone else's blog
+            if (!author.UserName.Equals(User.Identity.Name) && !User.IsInRole("Admin"))
+            {
+                return View("~/Views/Account/AccessDenied.cshtml");
+            }
+
+            // Build model
+            EditBlogViewModel model = new EditBlogViewModel
+            {
+                Title = blog.Title,
+                BriefDescription = blog.BriefDescription,
+                Topic = blog.Topic,
+                Date = blog.Date,
+                BlogContent = blog.BlogContent,
+                BlogId = BlogId,
+                UserId = blog.UserId
+            };
+
+            return View(model);
+        }
+
+        // Post new blogs
+        [Authorize]
+        [HttpPost]
+        public IActionResult EditBlog(EditBlogViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var blog = _blogRepository.GetBlog(model.BlogId);
+
+                if (blog == null)
+                {
+                    ViewBag.ErrorTitle = "Error in finding the blog!";
+                    ViewBag.ErrorMessage = "No blog with such ID was found.";
+                    return View("Error");
+                }
+
+                // Update all fields
+                blog.Title = model.Title;
+                blog.BriefDescription = model.BriefDescription;
+                blog.Topic = model.Topic;
+                blog.BlogContent = model.BlogContent;
+                blog.Date = DateTime.Today;
+                blog.Approved = false;
+
+                var updatedBlog = _blogRepository.Update(blog);
+                if (updatedBlog != null)
+                {
+                    // Success alert
+                    TempData["Alert"] = $"Blog with title \"{updatedBlog.Title}\" has been updated";
+                    TempData["AlertClass"] = "alert-success";
+                    return RedirectToAction("Author", "Profile", new { username = User.Identity.Name });
+                }
+            }
+
+            return View(model);
+        }
+
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> DeleteBlog(int BlogId)
+        {
+
+            var blog = _blogRepository.GetBlog(BlogId);
+
+            // Invalid blog
+            if (blog == null)
+            {
+                ViewBag.ErrorTitle = "Error in deleting the blog!";
+                ViewBag.ErrorMessage = "No blog with such ID was found.";
+                return View("Error");
+            }
+
+            var author = await userManager.FindByIdAsync(blog.UserId);
+
+            // Not delete by author
+            if (blog.UserId != author.Id)
+            {
+                return View("~/Views/Account/AccessDenied.cshtml");
+            }
+
+            // Delete blog
+            var deletedBlog = _blogRepository.Delete(BlogId);
+
+            // Success alert
+            //TempData["Alert"] = $"Blog with title \"{deletedBlog.Title}\"  has been deleted";
+            //TempData["AlertClass"] = "alert-success";
+            return RedirectToAction("Author", "Profile", new { userName = User.Identity.Name });
+
+        }
+
+
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
