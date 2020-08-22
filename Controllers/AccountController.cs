@@ -7,6 +7,7 @@ using Blogary.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
@@ -37,6 +38,14 @@ namespace Blogary.Controllers
 
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
             var response = await client.SendEmailAsync(msg);
+        }
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
 
 
@@ -243,6 +252,101 @@ namespace Blogary.Controllers
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
+            return View(model);
+        }
+
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> AssignAdmin()
+        {
+            var role = await roleManager.FindByNameAsync("Admin");
+
+            if (role == null)
+            {
+                ViewBag.ErrorTitle = $"Invalid role";
+                ViewBag.ErrorMessage = $"Admin role cannot be found";
+                return View("Error");
+            }
+
+            var model = new List<UserRoleViewModel>();
+            var users = await userManager.Users.ToListAsync();
+
+            // Build List of model
+            foreach (var user in users)
+            {
+                var userRoleViewModel = new UserRoleViewModel
+                {
+                    UserId = user.Id,
+                    UserName = user.UserName
+                };
+
+                userRoleViewModel.IsSelected = await userManager.IsInRoleAsync(user, role.Name);
+
+                model.Add(userRoleViewModel);
+            }
+
+            if (TempData["Alert"] != null && TempData["AlertClass"] != null)
+            {
+                ViewBag.Alert = TempData["Alert"].ToString();
+                ViewBag.AlertClass = TempData["AlertClass"].ToString();
+            }
+
+
+            return View(model);
+        }
+
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> AssignAdmin(List<UserRoleViewModel> model)
+        {
+            var role = await roleManager.FindByNameAsync("Admin");
+
+            if (role == null)
+            {
+                ViewBag.ErrorTitle = $"Invalid role";
+                ViewBag.ErrorMessage = $"Admin role cannot be found";
+                return View("Error");
+            }
+
+            for (int i = 0; i < model.Count; i++)
+            {
+                var user = await userManager.FindByIdAsync(model[i].UserId);
+
+                IdentityResult result = null;
+
+                if (model[i].IsSelected && !(await userManager.IsInRoleAsync(user, role.Name)))
+                {
+                    // Assigned and was not admin
+                    result = await userManager.AddToRoleAsync(user, role.Name);
+                }
+                else if (!model[i].IsSelected && (await userManager.IsInRoleAsync(user, role.Name)))
+                {
+                    // Unassigned and was admin
+                    result = await userManager.RemoveFromRoleAsync(user, role.Name);
+                }
+                else
+                {
+                    // State unchanged
+                    continue;
+                }
+
+                if (result.Succeeded)
+                {
+                    if (i < (model.Count - 1))
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index");
+                    }
+                }
+            }
+            // Redirect after last user
+            ViewBag.Alert = "Admins have been updated";
+            ViewBag.AlertClass = "alert-success";
             return View(model);
         }
     }

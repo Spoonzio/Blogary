@@ -17,21 +17,26 @@ namespace Blogary.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IBlogRepository _blogRepository;
         private readonly UserManager<ApplicationUser> userManager;
+        private readonly RoleManager<IdentityRole> roleManager;
 
         public HomeController(ILogger<HomeController> logger,
                                 IBlogRepository blogRepository,
-                                UserManager<ApplicationUser> userManager)
+                                UserManager<ApplicationUser> userManager,
+                                RoleManager<IdentityRole> roleManager)
         {
             _logger = logger;
             _blogRepository = blogRepository;
             this.userManager = userManager;
+            this.roleManager = roleManager;
         }
+
 
         [AllowAnonymous]
         [HttpGet]
         public IActionResult Index()
         {
-            IEnumerable<Blog> allBlogs = _blogRepository.GetAllBlogs().Where(b => b.Approved == true || b.Approved == false); // Remove after approval is implemented
+            
+            IEnumerable<Blog> allBlogs = _blogRepository.GetAllBlogs().Where(b => b.Approved == true); 
 
             if (allBlogs == null)
             {
@@ -267,7 +272,7 @@ namespace Blogary.Controllers
             // Prevent editing someone else's blog
             if (!author.UserName.Equals(User.Identity.Name) && !User.IsInRole("Admin"))
             {
-                return View("~/Views/Account/AccessDenied.cshtml");
+                return RedirectToAction("AccessDenied", "Account");
             }
 
             // Build model
@@ -385,6 +390,53 @@ namespace Blogary.Controllers
             }
 
             return View(authors);
+        }
+
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public IActionResult AdminDeleteBlog(int BlogId)
+        {
+            var blog = _blogRepository.GetBlog(BlogId);
+
+            // Invalid blog
+            if (blog == null)
+            {
+                ViewBag.ErrorTitle = "Error in deleting the blog!";
+                ViewBag.ErrorMessage = "No blog with such ID was found.";
+                return View("Error");
+            }
+
+            // Not admin
+            if (!User.IsInRole("Admin"))
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            // Delete Blog
+            var deletedBlog = _blogRepository.Delete(BlogId);
+
+            TempData["Alert"] = $"Blog with title \"{deletedBlog.Title}\" has been deleted";
+            TempData["AlertClass"] = "alert-success";
+            return RedirectToAction("BlogsPending", "Home");
+        }
+
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public IActionResult BlogsPending()
+        {
+            // Get all unapprove blog
+            var unapprovedBlogs = _blogRepository.GetAllBlogs().Where(b => b.Approved == false).ToList();
+
+            // Show success alert if any
+            if (TempData["Alert"] != null && TempData["AlertClass"] != null)
+            {
+                ViewBag.Alert = TempData["Alert"].ToString();
+                ViewBag.AlertClass = TempData["AlertClass"].ToString();
+            }
+
+            return View(unapprovedBlogs);
         }
 
 
