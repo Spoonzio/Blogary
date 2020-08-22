@@ -182,5 +182,68 @@ namespace Blogary.Controllers
             await signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
         }
+
+
+        // Get modify page
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> EditProfile(string username)
+        {
+            // Check if accessor is user
+            if (username != User.Identity.Name)
+            {
+                return RedirectToAction("AccessDenied");
+            }
+
+            var user = await userManager.FindByNameAsync(username);
+
+            if (user == null)
+            {
+                ViewBag.ErrorTitle = "User cannot be found!";
+                ViewBag.ErrorMessage = "No user with such ID was found.";
+                return View("Error");
+            }
+
+            // Create view model for page
+            EditProfileViewModel model = new EditProfileViewModel()
+            {
+                Id = user.Id,
+                NewUsername = username
+            };
+
+            return View(model);
+        }
+
+        // Post Edit Profile Page 
+        [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> EditProfile(EditProfileViewModel model)
+        {
+            // Check identity
+            var editor = await userManager.FindByNameAsync(User.Identity.Name);
+            if (editor.Id != model.Id)
+            {
+                return RedirectToAction("AccessDenied");
+            }
+
+            // Edit current user
+            editor.UserName = model.NewUsername;
+
+            // Update
+            var result = await userManager.UpdateAsync(editor);
+
+            // Succeed
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Logout");
+            }
+
+            // Return error to view page
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return View(model);
+        }
     }
 }
