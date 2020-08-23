@@ -35,8 +35,8 @@ namespace Blogary.Controllers
         [HttpGet]
         public IActionResult Index()
         {
-            
-            IEnumerable<Blog> allBlogs = _blogRepository.GetAllBlogs().Where(b => b.Approved == true); 
+
+            IEnumerable<Blog> allBlogs = _blogRepository.GetAllBlogs().Where(b => b.Approved == true);
 
             if (allBlogs == null)
             {

@@ -65,6 +65,10 @@
             "SendGrid": {
               "target": "Package",
               "version": "[9.21.0, )"
+            },
+            "System.Configuration.ConfigurationManager": {
+              "target": "Package",
+              "version": "[4.7.0, )"
             }
           },
           "imports": [

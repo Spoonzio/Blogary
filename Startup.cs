@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Protocols;
+using System.Configuration;
 
 namespace Blogary
 {
@@ -27,9 +29,9 @@ namespace Blogary
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllersWithViews();
-         
+
             services.AddDbContextPool<AppDbContext>(options =>
-                options.UseSqlServer("Data Source=tcp:blogarydbserver.database.windows.net,1433;Initial Catalog=Blogary_db;User Id=BlogaryAdmin@blogarydbserver;Password=Spoonzio!")                                    // CONNECTION STRING GOES HERE
+                options.UseSqlServer(Configuration.GetConnectionString("BlogaryDB"))
             );
 
             // Identity user and roles

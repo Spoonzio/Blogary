@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
 
@@ -18,20 +19,23 @@ namespace Blogary.Controllers
         private readonly SignInManager<ApplicationUser> signInManager;
         private readonly UserManager<ApplicationUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly IConfiguration _configuration;
 
         public AccountController(SignInManager<ApplicationUser> signInManager,
                                     UserManager<ApplicationUser> userManager,
-                                    RoleManager<IdentityRole> roleManager)
+                                    RoleManager<IdentityRole> roleManager,
+                                    IConfiguration configuration)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
+            _configuration = configuration;
         }
 
         // Send email using SendGrid service
         public async Task SendEmail(string toEmailAddress, string toName, string subject, string plainTextContent, string htmlContent)
         {
-            string apiKey = ""; // SendGrid Api Key
+            string apiKey = _configuration.GetValue<string>("SENDGRID_KEY");
             var client = new SendGridClient(apiKey);
             var from = new EmailAddress("Admin@Blogary.com", "Blogary");
             var to = new EmailAddress(toEmailAddress, toName);
@@ -139,7 +143,6 @@ namespace Blogary.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Remove Email Confirmed after SendEmail is implemented
                 // Create new user
                 var user = new ApplicationUser
                 {
@@ -388,7 +391,7 @@ namespace Blogary.Controllers
                 }
 
                 // Show confirmation either way to prevent brute force attack
-                return View("ForgetPasswordConfirmation");
+                return View("ForgotPasswordConfirmation");
             }
 
             return View(model);

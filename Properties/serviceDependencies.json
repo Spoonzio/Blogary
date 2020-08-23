@@ -3,6 +3,9 @@
     "mssql1": {
       "type": "mssql",
       "connectionId": "BlogaryDB"
+    },
+    "secrets1": {
+      "type": "secrets"
     }
   }
 }
