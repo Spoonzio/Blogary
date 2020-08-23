@@ -144,8 +144,7 @@ namespace Blogary.Controllers
                 var user = new ApplicationUser
                 {
                     UserName = model.UserName,
-                    Email = model.Email,
-                    EmailConfirmed = true
+                    Email = model.Email
                 };
 
                 var result = await userManager.CreateAsync(user, model.Password);
@@ -167,7 +166,7 @@ namespace Blogary.Controllers
                                         + " Thank you, The Blogary Team";
 
                     // Remove After SendEmail is Implemented
-                    //await SendEmail(userEmail, userName, subject, plainText, htmlText);
+                    await SendEmail(userEmail, userName, subject, plainText, htmlText);
 
                     // Success message
                     return View("RegisterSuccess");
@@ -349,5 +348,134 @@ namespace Blogary.Controllers
             ViewBag.AlertClass = "alert-success";
             return View(model);
         }
+
+
+        // Get Forgot Password Page
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        // Post for Forget Password
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                string email = model.Email;
+
+                var user = await userManager.FindByEmailAsync(email);
+
+                if (user != null)
+                {
+                    // Generate token for email
+                    var token = await userManager.GeneratePasswordResetTokenAsync(user);
+                    var passwordResetLink = Url.Action("ResetPassword", "Account", new { email = model.Email, token = token }, Request.Scheme);
+
+                    // Send reset link to user's email 
+                    string userEmail = user.Email;
+                    string userName = user.UserName;
+                    string subject = "Blogary - Reset Password";
+                    string plainText = $"Hi {userName}, click the link below to reset your password. \n {passwordResetLink} \n Thank you, The Blogary Team";
+                    string htmlText = "Hi " + userName + ", click the link below to reset your password. <br>"
+                                        + "<a href='" + passwordResetLink + "'>" + passwordResetLink + "</a> <br>"
+                                        + " Thank you, The Blogary Team.";
+
+                    await SendEmail(userEmail, userName, subject, plainText, htmlText);
+                }
+
+                // Show confirmation either way to prevent brute force attack
+                return View("ForgetPasswordConfirmation");
+            }
+
+            return View(model);
+        }
+
+        // Access From Reset Password Link
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult ResetPassword(string email, string token)
+        {
+            if (email == null || token == null)
+            {
+                ViewBag.ErrorTitle = "Link is invalid!";
+                ViewBag.ErrorMessage = "Please double check the link";
+                return View("Error");
+            }
+
+            return View();
+        }
+
+        // Post for Reset Password
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await userManager.FindByEmailAsync(model.Email);
+
+                if (user == null)
+                {
+                    // Confirm nonetheless to prevent brute force attack
+                    return View("ResetPasswordConfirmation");
+                }
+
+                // Reset password action
+                var result = await userManager.ResetPasswordAsync(user, model.Token, model.Password);
+
+                if (result.Succeeded)
+                {
+                    return View("ResetPasswordConfirmation");
+                }
+                else
+                {
+                    // Error in reset
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+
+                }
+            }
+
+            return View(model);
+        }
+
+        // Confirm email for user
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (userId == null || token == null)
+            {
+                return RedirectToAction("index", "home");
+            }
+
+            // Find user
+            var user = await userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                ViewBag.ErrorTitle = $"Invalid detail";
+                ViewBag.ErrorMessage = $"The User ID {userId} is invalid";
+                return View("Error");
+            }
+
+            // User found
+            var result = await userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                return View();
+            }
+
+            // User cannot be found
+            ViewBag.ErrorTitle = "Email cannot be confirmed";
+            return View("Error");
+        }
+
     }
 }
