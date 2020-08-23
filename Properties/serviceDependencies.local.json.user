@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "secrets1": {
+      "restored": true,
+      "restoreTime": "2020-08-23T05:50:14.3925788Z"
+    },
+    "mssql1": {
+      "restored": true,
+      "restoreTime": "2020-08-20T23:49:40.6729473Z"
+    }
+  },
+  "parameters": {
+    "resourceGroup": {
+      "Type": "resourceGroup",
+      "Value": "Blogary"
+    },
+    "subscriptionId": {
+      "Type": "subscription",
+      "Value": "31ff88f6-757b-4f2f-9fed-4d6ec4d09e7a"
+    }
+  }
+}

@@ -1,0 +1,55 @@
+﻿@model List<Blog>
+
+@{
+    ViewBag.Title = "Approve Blogs";
+}
+<h1 class="display-4">Approve Blogs</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Title</th>
+            <th scope="col">Topic</th>
+            <th scope="col">Brief Description</th>
+            <th scope="col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var blog in Model)
+        {
+            <tr>
+                <td>@blog.Id</td>
+                <td>@blog.Title</td>
+                <td>@blog.Topic.ToString()</td>
+                <td>@blog.BriefDescription</td>
+                <td>
+
+                    <a asp-action="ViewBlog"
+                       asp-controller="Home"
+                       asp-route-BlogId="@blog.Id" class="btn btn-primary mb-1">
+                        View
+                    </a>
+
+                    <form method="post" class="mb-1">
+                        <button type="submit"
+                                asp-action="ApproveBlog" asp-controller="Home"
+                                asp-route-BlogId="@blog.Id"
+                                class="btn btn-success">
+                            Approve
+                        </button>
+                    </form>
+
+                    <form method="post" class="mb-1">
+                        <button type="submit"
+                                asp-action="AdminDeleteBlog" asp-controller="Home"
+                                asp-route-BlogId="@blog.Id" class="btn btn-danger">
+                            Delete
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+
+    </tbody>
+</table>

@@ -6,9 +6,13 @@ using Blogary.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Protocols;
+using System.Configuration;
 
 namespace Blogary
 {
@@ -26,9 +30,30 @@ namespace Blogary
         {
             services.AddControllersWithViews();
 
-            // Harcoded DB TBChanged
-            services.AddScoped<IBlogRepository, MockBlogRepository>();
+            services.AddDbContextPool<AppDbContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("BlogaryDB"))
+            );
+
+            // Identity user and roles
+            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.Password.RequiredLength = 10;
+                options.Password.RequiredUniqueChars = 3;
+                options.SignIn.RequireConfirmedEmail = true;
+
+            })
+            .AddEntityFrameworkStores<AppDbContext>()
+            .AddDefaultTokenProviders();
+
+            // MVC
+            services.AddMvc(option => {
+                option.EnableEndpointRouting = false;
+                //Policies
+            });
+
+            services.AddScoped<IBlogRepository, SQLBlogRepository>();
         }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -39,22 +64,20 @@ namespace Blogary
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-                app.UseHsts();
+                app.UseExceptionHandler("/Error");
+                app.UseStatusCodePagesWithReExecute("/Error/{0}");
             }
-            app.UseHttpsRedirection();
+
+            // Serve static files
             app.UseStaticFiles();
 
-            app.UseRouting();
+            // Authentication
+            app.UseAuthentication();
 
-            app.UseAuthorization();
-
-            app.UseEndpoints(endpoints =>
+            // Route
+            app.UseMvc(routes =>
             {
-                endpoints.MapControllerRoute(
-                    name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                routes.MapRoute("default", "{controller=Home}/{action=Index}");
             });
         }
     }
