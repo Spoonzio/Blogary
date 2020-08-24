@@ -52,7 +52,7 @@
                             @{
                                 if (User.Identity.Name == Model.User.UserName || User.IsInRole("Admin"))
                                 {
-                                    <form method="post">
+                                    <form method="post" class="deleteButton">
                                         <button type="submit" class="btn btn-danger" asp-action="DeleteBlog" asp-controller="Home" asp-route-BlogId=@blog.Id>
                                             Delete blog
                                         </button>
