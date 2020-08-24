@@ -5,7 +5,8 @@
       "connectionId": "BlogaryDB"
     },
     "secrets1": {
-      "type": "secrets"
+      "type": "secrets",
+      "connectionId": "ASPNETCORE_HOSTINGSTARTUP__KEYVAULT__CONFIGURATIONVAULT"
     }
   }
 }

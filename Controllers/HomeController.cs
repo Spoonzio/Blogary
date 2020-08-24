@@ -439,12 +439,31 @@ namespace Blogary.Controllers
             return View(unapprovedBlogs);
         }
 
-
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        // Approve blog post
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public IActionResult ApproveBlog(int BlogId)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            Blog blog = _blogRepository.GetBlog(BlogId);
+
+            // Invalid ID
+            if (blog == null)
+            {
+                ViewBag.ErrorTitle = "Error in approving the blog!";
+                ViewBag.ErrorMessage = "No blog with such ID was found.";
+                return View("Error");
+            }
+
+            blog.Approved = true;
+
+            // Update DB
+            _blogRepository.Update(blog);
+
+            // Alert
+            TempData["Alert"] = $"Blog with title \"{blog.Title}\" has been approved";
+            TempData["AlertClass"] = "alert-success";
+            return RedirectToAction("BlogsPending");
         }
+
     }
 }
