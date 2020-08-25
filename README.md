@@ -83,6 +83,10 @@ dotnet restore
 <!-- USAGE EXAMPLES -->
 ## Usage
 
+Demo Screenshot: 
+![alt text][screenshot1]
+
+
 ### API
 To request for a Blog information
 ```sh
@@ -129,3 +133,5 @@ Project Link: [http://https://blogary.azurewebsites.net](http://https://blogary.
 * [LogoHub](https://logohub.io/)
 * [Choose an Open Source License](https://choosealicense.com)
 * [ReadMe Guide](https://github.com/othneildrew/Best-README-Template)
+
+[screenshot1]: https://raw.githubusercontent.com/Spoonzio/Blogary/master/Images/landing.png "Blogary screenshot 1"
