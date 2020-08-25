@@ -125,7 +125,7 @@ Blogary is distributed under the MIT License. See LICENSE for more information.
 ## Contact
 My website - [https://www.jpan.xyz/](https://www.jpan.xyz/)
 
-Project Link: [http://https://blogary.azurewebsites.net](http://https://blogary.azurewebsites.net)
+Project Link: [https://blogary.azurewebsites.net](https://blogary.azurewebsites.net)
 
 <!-- ACKNOWLEDGEMENTS -->
 ## Acknowledgements
